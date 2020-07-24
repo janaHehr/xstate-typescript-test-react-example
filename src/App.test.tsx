@@ -1,11 +1,16 @@
 import React from 'react';
-import { Feedback } from './App';
+import { App } from './App';
 import { Machine } from 'xstate';
 import { render, fireEvent, cleanup, screen } from '@testing-library/react';
 import { createModel } from '@xstate/test';
+import { FeedbackContext, FeedbackSchema, FeedbackEvents } from './machines/feedbackMachine';
 
-describe('feedback app', () => {
-  const feedbackMachine = Machine({
+describe('app', () => {
+  const feedbackMachine = Machine<
+  FeedbackContext,
+  FeedbackSchema,
+  FeedbackEvents
+>({
     id: 'feedback',
     initial: 'question',
     states: {
@@ -51,7 +56,7 @@ describe('feedback app', () => {
         type: 'final',
         meta: {
           test: () => {
-            expect(screen.queryByTestId('thanks-screen')).not.toBeInTheDocument();
+            expect(screen.getByText('Done')).toBeInTheDocument();
           }
         }
       }
@@ -89,14 +94,14 @@ describe('feedback app', () => {
 
       plan.paths.forEach(path => {
         it(path.description, () => {
-          const rendered = render(<Feedback />);
+          const rendered = render(<App />);
           return path.test(rendered);
         });
       });
     });
   });
 
-  it('coverage', () => {
+  it('component covers all states', () => {
     testModel.testCoverage();
   });
 });

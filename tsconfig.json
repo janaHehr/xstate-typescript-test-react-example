@@ -1,6 +1,6 @@
 {
   "include": [
-    "./src/*"
+    "./src/*", "src/screens/ThanksScreen.tsx", "src/screens/QuestionScreen.tsx", "src/screens/FormScreen.tsx"
   ],
   "compilerOptions": {
     "strict": true,
