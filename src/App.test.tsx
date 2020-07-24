@@ -1,67 +1,30 @@
 import React from 'react';
 import { App } from './App';
-import { Machine } from 'xstate';
-import { render, fireEvent, cleanup, screen } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { createModel } from '@xstate/test';
-import { FeedbackContext, FeedbackSchema, FeedbackEvents } from './machines/feedbackMachine';
+import { feedbackMachine } from './machines/feedbackMachine';
 
 describe('app', () => {
-  const feedbackMachine = Machine<
-  FeedbackContext,
-  FeedbackSchema,
-  FeedbackEvents
->({
-    id: 'feedback',
-    initial: 'question',
-    states: {
-      question: {
-        on: {
-          CLICK_GOOD: 'thanks',
-          CLICK_BAD: 'form',
-          CLOSE: 'closed'
-        },
-        meta: {
-          test: () => {
-            expect(screen.getByTestId('question-screen')).toBeInTheDocument();
-          }
-        }
-      },
-      form: {
-        on: {
-          SUBMIT: [
-            {
-              target: 'thanks',
-              cond: (_, e) => e.value.length
-            }
-          ],
-          CLOSE: 'closed'
-        },
-        meta: {
-          test: () => {
-            expect(screen.getByTestId('form-screen')).toBeInTheDocument();
-          }
-        }
-      },
-      thanks: {
-        on: {
-          CLOSE: 'closed'
-        },
-        meta: {
-          test: () => {
-            expect(screen.getByTestId('thanks-screen')).toBeInTheDocument();
-          }
-        }
-      },
-      closed: {
-        type: 'final',
-        meta: {
-          test: () => {
-            expect(screen.getByText('Done')).toBeInTheDocument();
-          }
-        }
-      }
+  feedbackMachine.states.question.meta = {
+    test: () => {
+      expect(screen.getByTestId('question-screen')).toBeInTheDocument();
     }
-  });
+  };
+  feedbackMachine.states.form.meta = {
+    test: () => {
+      expect(screen.getByTestId('form-screen')).toBeInTheDocument();
+    }
+  };
+  feedbackMachine.states.thanks.meta = {
+    test: () => {
+      expect(screen.getByTestId('thanks-screen')).toBeInTheDocument();
+    }
+  };
+  feedbackMachine.states.closed.meta = {
+    test: () => {
+      expect(screen.getByText('Done')).toBeInTheDocument();
+    }
+  };
 
   const testModel = createModel(feedbackMachine, {
     events: {
@@ -90,8 +53,6 @@ describe('app', () => {
 
   testPlans.forEach(plan => {
     describe(plan.description, () => {
-      afterEach(cleanup);
-
       plan.paths.forEach(path => {
         it(path.description, () => {
           const rendered = render(<App />);
